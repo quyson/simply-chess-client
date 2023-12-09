@@ -1,24 +1,24 @@
 import { useState } from "react";
-import { Chess } from "chess.js";
+import { Chess, PieceSymbol } from "chess.js";
 import { Chessboard } from "react-chessboard";
 
 export default function PlayRandomMoveEngine() {
   interface Move {
     from: string;
     to: string;
-    promotion: "q";
+    promotion?: PieceSymbol | undefined;
   }
-  const [game, setGame] = useState(new Chess());
+  const [game, setGame] = useState<Chess>(new Chess());
 
   function makeAMove(move: Move) {
-    const gameCopy = { ...game };
+    const gameCopy: Chess = new Chess(game.fen());
     const result = gameCopy.move(move);
     setGame(gameCopy);
     return result; // null if the move was illegal, the move object if the move was legal
   }
 
   function onDrop(sourceSquare: string, targetSquare: string) {
-    const move = makeAMove({
+    const move: Move = makeAMove({
       from: sourceSquare,
       to: targetSquare,
       promotion: "q", // always promote to a queen for example simplicity
@@ -26,7 +26,6 @@ export default function PlayRandomMoveEngine() {
 
     // illegal move
     if (move === null) return false;
-    setTimeout(makeRandomMove, 200);
     return true;
   }
 
