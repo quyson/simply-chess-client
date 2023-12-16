@@ -14,7 +14,7 @@ const Register = () => {
   const [confirmPassword, setConfirmPassword] = useState<string | null>(null);
   const [error, setError] = useState<ErrorData | null>(null);
 
-  const handleSubmit = async (e: Event) => {
+  const handleSubmit = async (e: React.MouseEvent<HTMLButtonElement>) => {
     if (!passwordMatch()) {
       return;
     }
@@ -55,18 +55,20 @@ const Register = () => {
           {error ? <div>{error.message}</div> : null}
           <label>Password</label>
           <input
+            type="password"
             id="password"
             name="password"
             onChange={(e) => setPassword(e.target.value)}
           ></input>
           <label>Confirm Password</label>
           <input
+            type="password"
             id="confirmPassword"
             name="confirmPassword"
             onChange={(e) => setConfirmPassword(e.target.value)}
           ></input>
         </div>
-        <button>Register</button>
+        <button onClick={handleSubmit}>Register</button>
       </form>
     </div>
   );

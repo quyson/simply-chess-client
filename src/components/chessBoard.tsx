@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Chess, PieceSymbol } from "chess.js";
 import { Chessboard } from "react-chessboard";
 
-export default function PlayRandomMoveEngine() {
+export default function ChessLogic() {
   interface Move {
     from: string;
     to: string;
@@ -13,6 +13,7 @@ export default function PlayRandomMoveEngine() {
   function makeAMove(move: Move) {
     const gameCopy: Chess = new Chess(game.fen());
     const result = gameCopy.move(move);
+    console.log(result);
     setGame(gameCopy);
     return result; // null if the move was illegal, the move object if the move was legal
   }
