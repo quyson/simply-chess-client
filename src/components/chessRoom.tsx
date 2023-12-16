@@ -10,8 +10,22 @@ const ChessRoom = () => {
   const [joinRoomId, setJoinRoomId] = useState<string | null>(null);
   const [socketId, setSocketId] = useState<string | null>(null);
   const [globalSocket, setGlobalSocket] = useState<Socket | null>(null);
+  const [opponentUsername, setOpponentUsername] = useState<string | null>(null);
+  const [username, setUsername] = useState<string | null>(null);
+  const [start, setStart] = useState<boolean>(false);
 
-  const handleJoinRoom = (e: React.MouseEvent<HTMLButtonElement>): void => {};
+  const handleJoinRoom = (
+    e: React.MouseEvent<HTMLButtonElement>,
+    roomId: string,
+    username: string,
+    socket: Socket
+  ): void => {
+    const idData = {
+      gameId: roomId,
+      username: username,
+    };
+    socket.emit("playerJoinGame", idData);
+  };
 
   const handleCreateNewGame = (
     e: React.MouseEvent<HTMLButtonElement>,
@@ -28,13 +42,28 @@ const ChessRoom = () => {
     const socket: Socket = io("http://localhost:8000", {
       query: { token },
     });
+
     setGlobalSocket(socket);
+
     console.log("Connecting to Socket.IO...");
+
     socket.emit("joinChessRoom");
+
     socket.on("createNewGame", (gameId, socketId) => {
       console.log("Joined Room");
       setRoomId(gameId);
       setSocketId(socketId);
+    });
+
+    socket.on("start game", (idData) => {
+      setOpponentUsername(idData.username);
+      socket.emit("send username", roomId, username);
+      setStart(true);
+    });
+
+    socket.on("give username", (username) => {
+      setStart(true);
+      setOpponentUsername(username);
     });
 
     return () => {
@@ -47,9 +76,12 @@ const ChessRoom = () => {
       <h1>Chess</h1>
       {roomId ? <div>Room ID{roomId}</div> : null}
       {socketId ? <div>Socket ID{socketId}</div> : null}
-      <div>
-        <ChessBoard />
-      </div>
+      {username && opponentUsername ? (
+        <div>
+          {username} VS {opponentUsername}
+        </div>
+      ) : null}
+      <div>{start ? <ChessBoard /> : null}</div>
       <div>
         <button onClick={(e) => handleCreateNewGame(e, globalSocket!)}>
           Create New Game
@@ -62,7 +94,13 @@ const ChessRoom = () => {
             placeholder="Room Id"
             onChange={(e) => setJoinRoomId(e.target.value)}
           ></input>
-          <button onClick={handleJoinRoom}>Join Game</button>
+          <button
+            onClick={(e) =>
+              handleJoinRoom(e, roomId!, username!, globalSocket!)
+            }
+          >
+            Join Game
+          </button>
         </form>
       </div>
     </div>
