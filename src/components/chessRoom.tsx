@@ -3,9 +3,12 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import { Socket, io } from "socket.io-client";
 import ChessBoard from "./chessBoard";
+import ChessLogic from "./chessBoard";
 import { v4 as uuidv4 } from "uuid";
+import { useNavigate } from "react-router-dom";
 
 const ChessRoom = () => {
+  const navigate = useNavigate();
   const [roomId, setRoomId] = useState<string | null>(null);
   const [joinRoomId, setJoinRoomId] = useState<string | null>(null);
   const [socketId, setSocketId] = useState<string | null>(null);
@@ -16,14 +19,16 @@ const ChessRoom = () => {
 
   const handleJoinRoom = (
     e: React.MouseEvent<HTMLButtonElement>,
-    roomId: string,
+    joinRoomId: string,
     username: string,
     socket: Socket
   ): void => {
+    e.preventDefault();
     const idData = {
-      gameId: roomId,
+      gameId: joinRoomId,
       username: username,
     };
+    console.log(idData);
     socket.emit("playerJoinGame", idData);
   };
 
@@ -49,7 +54,7 @@ const ChessRoom = () => {
 
     socket.emit("joinChessRoom");
 
-    socket.on("createNewGame", (gameId, socketId) => {
+    socket.on("createNewGame", (gameId: string, socketId: string) => {
       console.log("Joined Room");
       setRoomId(gameId);
       setSocketId(socketId);
@@ -66,6 +71,11 @@ const ChessRoom = () => {
       setOpponentUsername(username);
     });
 
+    socket.on("connect_error", (error) => {
+      console.error("Socket.IO connection error:", error);
+      navigate("/");
+    });
+
     return () => {
       socket.disconnect();
       console.log("Socket.IO disconnected.");
@@ -74,14 +84,13 @@ const ChessRoom = () => {
   return (
     <div>
       <h1>Chess</h1>
-      {roomId ? <div>Room ID{roomId}</div> : null}
-      {socketId ? <div>Socket ID{socketId}</div> : null}
+      {roomId ? <div>Room ID: {roomId}</div> : null}
       {username && opponentUsername ? (
         <div>
           {username} VS {opponentUsername}
         </div>
       ) : null}
-      <div>{start ? <ChessBoard /> : null}</div>
+      {start ? ChessLogic() : null}
       <div>
         <button onClick={(e) => handleCreateNewGame(e, globalSocket!)}>
           Create New Game
@@ -96,7 +105,7 @@ const ChessRoom = () => {
           ></input>
           <button
             onClick={(e) =>
-              handleJoinRoom(e, roomId!, username!, globalSocket!)
+              handleJoinRoom(e, joinRoomId!, username!, globalSocket!)
             }
           >
             Join Game

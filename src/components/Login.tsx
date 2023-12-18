@@ -49,6 +49,7 @@ const Login = () => {
         ></input>
         <button onClick={handleSubmit}>Log In</button>
       </form>
+      <a href="/register">Register</a>
     </div>
   );
 };
