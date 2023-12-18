@@ -6,6 +6,8 @@ import ChessBoard from "./chessBoard";
 import ChessLogic from "./chessBoard";
 import { v4 as uuidv4 } from "uuid";
 import { useNavigate } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
+import { RootState } from "../redux/configureStore";
 
 const ChessRoom = () => {
   const navigate = useNavigate();
@@ -14,8 +16,11 @@ const ChessRoom = () => {
   const [socketId, setSocketId] = useState<string | null>(null);
   const [globalSocket, setGlobalSocket] = useState<Socket | null>(null);
   const [opponentUsername, setOpponentUsername] = useState<string | null>(null);
-  const [username, setUsername] = useState<string | null>(null);
   const [start, setStart] = useState<boolean>(false);
+
+  const username = useSelector(
+    (state: RootState) => state.user && state.user.currentUser
+  );
 
   const handleJoinRoom = (
     e: React.MouseEvent<HTMLButtonElement>,

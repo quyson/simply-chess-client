@@ -1,14 +1,18 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios, { AxiosResponse } from "axios";
+import { useDispatch } from "react-redux";
+import { setCurrentUser } from "../redux/slices/userSlice";
 import React from "react";
 
 const Login = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [username, setUsername] = useState<string | null>(null);
   const [password, setPassword] = useState<string | null>(null);
 
   interface Result {
+    username: string;
     message: string;
     token: string;
   }
@@ -21,8 +25,9 @@ const Login = () => {
         password: password,
       })
       .then((result: AxiosResponse<Result>) => {
-        localStorage.setItem("token", result.data.token);
         if (result.data.token) {
+          localStorage.setItem("token", result.data.token);
+          dispatch(setCurrentUser(result.data.username));
           navigate("/chessRoom");
         }
       })
@@ -30,6 +35,11 @@ const Login = () => {
         console.log(error);
       });
   };
+
+  useEffect(() => {
+    dispatch(setCurrentUser(null));
+    localStorage.setItem("token", "");
+  }, []);
 
   return (
     <div>
