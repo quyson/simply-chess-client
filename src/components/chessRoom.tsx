@@ -18,7 +18,7 @@ const ChessRoom = () => {
   const [opponentUsername, setOpponentUsername] = useState<string | null>(null);
   const [start, setStart] = useState<boolean>(false);
 
-  const username = useSelector(
+  const username: string | null = useSelector(
     (state: RootState) => state.user && state.user.currentUser
   );
 
@@ -33,7 +33,6 @@ const ChessRoom = () => {
       gameId: joinRoomId,
       username: username,
     };
-    console.log(idData);
     socket.emit("playerJoinGame", idData);
   };
 
@@ -67,13 +66,14 @@ const ChessRoom = () => {
 
     socket.on("start game", (idData) => {
       setOpponentUsername(idData.username);
-      socket.emit("send username", roomId, username);
       setStart(true);
+      socket.emit("send username", idData.gameId, username);
     });
 
-    socket.on("give username", (username) => {
-      setStart(true);
+    socket.on("give username", (username, gameId) => {
       setOpponentUsername(username);
+      setRoomId(gameId);
+      setStart(true);
     });
 
     socket.on("connect_error", (error) => {
@@ -86,6 +86,12 @@ const ChessRoom = () => {
       console.log("Socket.IO disconnected.");
     };
   }, []);
+
+  const handleDisconnect = (e: React.MouseEvent<HTMLButtonElement>): void => {
+    e.preventDefault();
+    window.location.reload();
+  };
+
   return (
     <div>
       <h1>Chess</h1>
@@ -95,27 +101,36 @@ const ChessRoom = () => {
           {username} VS {opponentUsername}
         </div>
       ) : null}
-      {start ? ChessLogic() : null}
+      {start ? <ChessLogic socket={globalSocket!} gameId={roomId!} /> : null}
       <div>
-        <button onClick={(e) => handleCreateNewGame(e, globalSocket!)}>
-          Create New Game
-        </button>
-        <form>
-          <label htmlFor="joinGame">Join Game</label>
-          <input
-            id="joinGame"
-            name="joinGame"
-            placeholder="Room Id"
-            onChange={(e) => setJoinRoomId(e.target.value)}
-          ></input>
-          <button
-            onClick={(e) =>
-              handleJoinRoom(e, joinRoomId!, username!, globalSocket!)
-            }
-          >
-            Join Game
-          </button>
-        </form>
+        {start ? (
+          <div>
+            <button onClick={(e) => handleDisconnect(e)}>Leave Match</button>
+          </div>
+        ) : null}
+        {!start ? (
+          <div>
+            <button onClick={(e) => handleCreateNewGame(e, globalSocket!)}>
+              Create New Game
+            </button>
+            <form>
+              <label htmlFor="joinGame">Join Game</label>
+              <input
+                id="joinGame"
+                name="joinGame"
+                placeholder="Room Id"
+                onChange={(e) => setJoinRoomId(e.target.value)}
+              ></input>
+              <button
+                onClick={(e) =>
+                  handleJoinRoom(e, joinRoomId!, username!, globalSocket!)
+                }
+              >
+                Join Game
+              </button>
+            </form>
+          </div>
+        ) : null}
       </div>
     </div>
   );
