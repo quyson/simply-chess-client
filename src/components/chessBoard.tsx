@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
-import { Chess, PieceSymbol } from "chess.js";
+import { Chess, PieceSymbol, Square } from "chess.js";
 import { Chessboard } from "react-chessboard";
 import { Socket, io } from "socket.io-client";
 
-type color = "black" | "white";
+type color = "b" | "w";
 
 interface ChessLogicProps {
   socket: Socket;
@@ -12,8 +12,8 @@ interface ChessLogicProps {
 }
 
 interface Move {
-  from: string;
-  to: string;
+  from: Square;
+  to: Square;
   promotion?: PieceSymbol | undefined;
 }
 
@@ -23,6 +23,9 @@ export default function ChessLogic({
   playerColor,
 }: ChessLogicProps) {
   const [game, setGame] = useState<Chess>(new Chess());
+  const [isPlayerTurn, setIsPlayerTurn] = useState<boolean>(
+    playerColor === "w"
+  );
 
   function makeAMove(move: Move) {
     const gameCopy: Chess = new Chess(game.fen());
@@ -32,25 +35,42 @@ export default function ChessLogic({
     return result; // null if the move was illegal, the move object if the move was legal
   }
 
-  function handleMove(move: Move, gameId: string) {
-    socket.emit("handle move", move, gameId);
-  }
-
-  function handleOpponentMove(opponentMove: Move) {
-    makeAMove(opponentMove);
-  }
-
-  function onDrop(sourceSquare: string, targetSquare: string) {
+  function handleMove(
+    sourceSquare: Square,
+    targetSquare: Square,
+    gameId: string
+  ) {
+    if (!isPlayerTurn) {
+      console.log("Not your turn!");
+      return false;
+    }
     const move: Move = makeAMove({
       from: sourceSquare,
       to: targetSquare,
       promotion: "q", // always promote to a queen for example simplicity
     });
 
-    // illegal move
-    if (move === null) return false;
-    handleMove(move, gameId);
-    return true;
+    const pieceColor = game.get(move.from)?.color;
+    if (pieceColor !== playerColor) {
+      console.log("You can only move your own pieces!");
+      return false;
+    }
+
+    const result = makeAMove(move);
+    if (result !== null) {
+      socket.emit("new move", gameId, move);
+      setIsPlayerTurn(false);
+      return true;
+    }
+  }
+
+  function handleOpponentMove(opponentMove: Move) {
+    makeAMove(opponentMove);
+  }
+
+  function onDrop(sourceSquare: Square, targetSquare: Square) {
+    const currentMove = handleMove(sourceSquare, targetSquare, gameId)!;
+    return currentMove;
   }
 
   useEffect(() => {

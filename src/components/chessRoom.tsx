@@ -12,7 +12,7 @@ import { RootState } from "../redux/configureStore";
 const ChessRoom = () => {
   const navigate = useNavigate();
 
-  type color = "black" | "white";
+  type color = "b" | "w";
 
   const [roomId, setRoomId] = useState<string | null>(null);
   const [joinRoomId, setJoinRoomId] = useState<string | null>(null);
@@ -70,7 +70,7 @@ const ChessRoom = () => {
 
     socket.on("start game", (idData) => {
       setOpponentUsername(idData.username);
-      setPlayerColor("white");
+      setPlayerColor("w");
       setStart(true);
       socket.emit("send username", idData.gameId, username);
     });
@@ -78,7 +78,7 @@ const ChessRoom = () => {
     socket.on("give username", (username, gameId) => {
       setOpponentUsername(username);
       setRoomId(gameId);
-      setPlayerColor("black");
+      setPlayerColor("b");
       setStart(true);
     });
 
