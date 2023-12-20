@@ -112,6 +112,8 @@ const ChessRoom = () => {
           socket={globalSocket!}
           gameId={roomId!}
           playerColor={playerColor!}
+          username={username!}
+          opponentUsername={opponentUsername!}
         />
       ) : null}
       <div>
