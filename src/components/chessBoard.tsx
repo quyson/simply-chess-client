@@ -3,9 +3,12 @@ import { Chess, PieceSymbol } from "chess.js";
 import { Chessboard } from "react-chessboard";
 import { Socket, io } from "socket.io-client";
 
+type color = "black" | "white";
+
 interface ChessLogicProps {
   socket: Socket;
   gameId: string;
+  playerColor: color;
 }
 
 interface Move {
@@ -14,7 +17,11 @@ interface Move {
   promotion?: PieceSymbol | undefined;
 }
 
-export default function ChessLogic({ socket, gameId }: ChessLogicProps) {
+export default function ChessLogic({
+  socket,
+  gameId,
+  playerColor,
+}: ChessLogicProps) {
   const [game, setGame] = useState<Chess>(new Chess());
 
   function makeAMove(move: Move) {

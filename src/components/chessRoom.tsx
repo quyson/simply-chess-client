@@ -11,12 +11,16 @@ import { RootState } from "../redux/configureStore";
 
 const ChessRoom = () => {
   const navigate = useNavigate();
+
+  type color = "black" | "white";
+
   const [roomId, setRoomId] = useState<string | null>(null);
   const [joinRoomId, setJoinRoomId] = useState<string | null>(null);
   const [socketId, setSocketId] = useState<string | null>(null);
   const [globalSocket, setGlobalSocket] = useState<Socket | null>(null);
   const [opponentUsername, setOpponentUsername] = useState<string | null>(null);
   const [start, setStart] = useState<boolean>(false);
+  const [playerColor, setPlayerColor] = useState<color | null>(null);
 
   const username: string | null = useSelector(
     (state: RootState) => state.user && state.user.currentUser
@@ -66,6 +70,7 @@ const ChessRoom = () => {
 
     socket.on("start game", (idData) => {
       setOpponentUsername(idData.username);
+      setPlayerColor("white");
       setStart(true);
       socket.emit("send username", idData.gameId, username);
     });
@@ -73,6 +78,7 @@ const ChessRoom = () => {
     socket.on("give username", (username, gameId) => {
       setOpponentUsername(username);
       setRoomId(gameId);
+      setPlayerColor("black");
       setStart(true);
     });
 
@@ -101,7 +107,13 @@ const ChessRoom = () => {
           {username} VS {opponentUsername}
         </div>
       ) : null}
-      {start ? <ChessLogic socket={globalSocket!} gameId={roomId!} /> : null}
+      {start ? (
+        <ChessLogic
+          socket={globalSocket!}
+          gameId={roomId!}
+          playerColor={playerColor!}
+        />
+      ) : null}
       <div>
         {start ? (
           <div>
