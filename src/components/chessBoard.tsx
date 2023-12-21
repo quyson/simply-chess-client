@@ -33,10 +33,14 @@ export default function ChessLogic({
   const [win, setWin] = useState<boolean | null>(null);
 
   function makeAMove(move: Move) {
+    console.log("before game copy", game.turn());
     const gameCopy: Chess = new Chess(game.fen());
+    console.log("initial turn", gameCopy.turn());
     const result = gameCopy.move(move);
-    console.log(result);
+    console.log("turn after move", gameCopy.turn());
+    console.log("ending turn/ expected opponent turn", gameCopy.turn());
     setGame(gameCopy);
+    console.log(gameCopy.turn(), playerColor);
     return result; // null if the move was illegal, the move object if the move was legal
   }
 
@@ -49,11 +53,11 @@ export default function ChessLogic({
       console.log("Not your turn!");
       return false;
     }
-    const move: Move = makeAMove({
+    const move: Move = {
       from: sourceSquare,
       to: targetSquare,
       promotion: "q", // always promote to a queen for example simplicity
-    });
+    };
 
     const pieceColor = game.get(move.from)?.color;
     if (pieceColor !== playerColor) {
@@ -62,9 +66,9 @@ export default function ChessLogic({
     }
 
     const result = makeAMove(move);
-
     if (result !== null) {
-      socket.emit("new move", gameId, move);
+      socket.emit("handle move", move, gameId);
+      console.log("emitted");
       setIsPlayerTurn(false);
       if (game.isCheckmate()) {
         setWin(true);
@@ -89,8 +93,13 @@ export default function ChessLogic({
   }
 
   useEffect(() => {
-    socket.on("opponent move", (opponentMove: Move) => {
-      handleOpponentMove(opponentMove);
+    socket.on("opponent move", (opponentMove) => {
+      const newMove: Move = {
+        from: opponentMove.from,
+        to: opponentMove.to,
+        promotion: "q",
+      };
+      handleOpponentMove(newMove);
     });
   }, []);
 
@@ -98,8 +107,10 @@ export default function ChessLogic({
     if (win == null) {
       return;
     } else if (win == false) {
+      alert("You LOSt");
       socket.emit("loss game", username, opponentUsername);
     } else {
+      alert("you won!");
       socket.emit("won game", username, opponentUsername);
     }
   }, [win]);
