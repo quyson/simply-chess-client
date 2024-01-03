@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Chess, PieceSymbol, Square } from "chess.js";
 import { Chessboard } from "react-chessboard";
 import { Socket, io } from "socket.io-client";
@@ -26,23 +26,20 @@ export default function ChessLogic({
   username,
   opponentUsername,
 }: ChessLogicProps) {
-  const [game, setGame] = useState<Chess>(new Chess());
+  const gameRef = useRef<Chess>(new Chess());
   const [isPlayerTurn, setIsPlayerTurn] = useState<boolean>(
     playerColor === "w"
   );
   const [win, setWin] = useState<boolean | null>(null);
 
   function makeAMove(move: Move) {
-    console.log("before game copy", game.turn());
-    const gameCopy: Chess = new Chess(game.fen());
-    console.log("initial turn", gameCopy.turn());
+    const gameCopy: Chess = new Chess(gameRef.current.fen());
     const result = gameCopy.move(move);
-    console.log("turn after move", gameCopy.turn());
-    console.log("ending turn/ expected opponent turn", gameCopy.turn());
-    setGame(gameCopy);
-    console.log(gameCopy.turn(), playerColor);
+    gameRef.current = new Chess(result.after);
     return result; // null if the move was illegal, the move object if the move was legal
   }
+
+  //the problem is that the turn
 
   function handleMove(
     sourceSquare: Square,
@@ -59,18 +56,21 @@ export default function ChessLogic({
       promotion: "q", // always promote to a queen for example simplicity
     };
 
-    const pieceColor = game.get(move.from)?.color;
+    const pieceColor = gameRef.current.get(move.from)?.color;
     if (pieceColor !== playerColor) {
       console.log("You can only move your own pieces!");
       return false;
     }
 
     const result = makeAMove(move);
+    if (!result) {
+      console.log("invalid");
+      return false;
+    }
     if (result !== null) {
-      socket.emit("handle move", move, gameId);
-      console.log("emitted");
+      socket.emit("handle move", result.after, gameId);
       setIsPlayerTurn(false);
-      if (game.isCheckmate()) {
+      if (gameRef.current.isCheckmate()) {
         setWin(true);
         return;
       }
@@ -78,9 +78,12 @@ export default function ChessLogic({
     }
   }
 
-  function handleOpponentMove(opponentMove: Move) {
-    makeAMove(opponentMove);
-    if (game.isCheckmate()) {
+  // the error is that the game state is not properly changing turns, i believe because of asynchronous conflicts
+  // so we must send only after game state is properly updated. we might have to use useref for up to date values but state to render
+
+  function handleOpponentMove(opponentMove: string) {
+    gameRef.current = new Chess(opponentMove);
+    if (gameRef.current.isCheckmate()) {
       setWin(false);
       return;
     }
@@ -94,12 +97,13 @@ export default function ChessLogic({
 
   useEffect(() => {
     socket.on("opponent move", (opponentMove) => {
-      const newMove: Move = {
-        from: opponentMove.from,
-        to: opponentMove.to,
-        promotion: "q",
-      };
-      handleOpponentMove(newMove);
+      handleOpponentMove(opponentMove);
+    });
+  }, []);
+
+  useEffect(() => {
+    socket.on("status", (message: string) => {
+      console.log(message);
     });
   }, []);
 
@@ -115,5 +119,5 @@ export default function ChessLogic({
     }
   }, [win]);
 
-  return <Chessboard position={game.fen()} onPieceDrop={onDrop} />;
+  return <Chessboard position={gameRef.current.fen()} onPieceDrop={onDrop} />;
 }
