@@ -1,6 +1,9 @@
 # Simply Chess
 This repository contains a simple web-based Chess application built using React, Node.js, Socket.IO, and the chess.js library. The application allows users to play Chess in real-time with another player. It includes features such as creating a new game, joining an existing game, making moves, and handling game outcomes.
 
+### Server Link
+https://github.com/quyson/simply-chess-server
+
 ## Technologies Used
 React: A JavaScript library for building user interfaces.
 Node.js: A JavaScript runtime for server-side development.
