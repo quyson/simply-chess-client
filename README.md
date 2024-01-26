@@ -1,46 +1,29 @@
-# Getting Started with Create React App
+## Simply Chess
+This repository contains a simple web-based Chess application built using React, Node.js, Socket.IO, and the chess.js library. The application allows users to play Chess in real-time with another player. It includes features such as creating a new game, joining an existing game, making moves, and handling game outcomes.
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## Technologies Used
+React: A JavaScript library for building user interfaces.
+Node.js: A JavaScript runtime for server-side development.
+Socket.IO: A library for enabling real-time, bidirectional, and event-based communication.
+chess.js: A JavaScript chess library for chess move generation, validation, and more.
+react-chessboard: A React component for rendering a chessboard.
 
-## Available Scripts
+## Application Structure
+The project is organized into three main components:
 
-In the project directory, you can run:
+App Component (App.tsx):
+Manages the overall application structure, routing, and renders different components based on routes.
 
-### `npm start`
+ChessLogic Component (ChessLogic.tsx):
+Manages the game logic, including moves, turns, and game outcomes.
+Uses the chess.js library to represent and manipulate the game state.
+Communicates with the server using Socket.IO for real-time updates.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+ChessRoom Component (ChessRoom.tsx):
+Handles the setup of the game, including creating and joining game rooms.
+Manages the connection to the Socket.IO server and handles events like creating new games, joining games, and starting games.
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
-
-### `npm test`
-
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
-
-### `npm run build`
-
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
-
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
+## Additional Notes
+The application uses Socket.IO for real-time communication between players. Ensure that the server is running and accessible for proper functionality.
+Feel free to explore and modify the code to add more features, improve functionality, or customize the UI.
+Enjoy playing Chess in this simple web application!
