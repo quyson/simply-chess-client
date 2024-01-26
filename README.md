@@ -5,11 +5,11 @@ This repository contains a simple web-based Chess application built using React,
 https://github.com/quyson/simply-chess-server
 
 ## Technologies Used
-React: A JavaScript library for building user interfaces.
-Node.js: A JavaScript runtime for server-side development.
-Socket.IO: A library for enabling real-time, bidirectional, and event-based communication.
-chess.js: A JavaScript chess library for chess move generation, validation, and more.
-react-chessboard: A React component for rendering a chessboard.
+1. React: A JavaScript library for building user interfaces.
+2. Node.js: A JavaScript runtime for server-side development.
+3. Socket.IO: A library for enabling real-time, bidirectional, and event-based communication.
+4. chess.js: A JavaScript chess library for chess move generation, validation, and more.
+5. react-chessboard: A React component for rendering a chessboard.
 
 ## Application Structure
 The project is organized into three main components:
